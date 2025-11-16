@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>FuelFriendly</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Poppins', 'sans-serif'],
+            },
+            colors: {
+              primary: {
+                DEFAULT: '#32B768',
+                light: '#56C78A',
+                dark: '#28A358'
+              },
+              dark: {
+                bg: '#181A20',
+                card: '#1F222A',
+                text: '#FFFFFF',
+                subtext: '#E0E0E0',
+                border: '#35383F',
+              },
+              light: {
+                bg: '#FFFFFF',
+                card: '#F7F7F7',
+                text: '#181A20',
+                subtext: '#666666',
+                border: '#E0E0E0',
+              }
+            },
+            fontSize: {
+              xs: ['0.6rem', { lineHeight: '0.75rem' }],
+              sm: ['0.7rem', { lineHeight: '1rem' }],
+              base: ['0.8rem', { lineHeight: '1.25rem' }],
+              lg: ['0.9rem', { lineHeight: '1.4rem' }],
+              xl: ['1rem', { lineHeight: '1.5rem' }],
+              '2xl': ['1.1rem', { lineHeight: '1.6rem' }],
+              '3xl': ['1.2rem', { lineHeight: '1.7rem' }],
+              '4xl': ['1.3rem', { lineHeight: '1.8rem' }],
+              '5xl': ['1.4rem', { lineHeight: '1.9rem' }],
+              '6xl': ['1.5rem', { lineHeight: '2rem' }],
+            }
+          }
+        },
+        darkMode: 'class'
+      }
+    </script>
+<style>
+      html, body { 
+        font-weight: 300; 
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+      .font-semibold { font-weight: 600 !important; }
+      .font-bold { font-weight: 700 !important; }
+      
+      /* Responsive font sizing for all screen sizes */
+      html {
+        font-size: 16px; /* Base font size */
+      }
+      
+      /* Small screens (phones) */
+      @media (max-width: 480px) {
+        html {
+          font-size: 14px;
+        }
+      }
+      
+      /* Medium screens (tablets) */
+      @media (min-width: 481px) and (max-width: 768px) {
+        html {
+          font-size: 15px;
+        }
+      }
+      
+      /* Large screens (desktops) */
+      @media (min-width: 769px) and (max-width: 1024px) {
+        html {
+          font-size: 16px;
+        }
+      }
+      
+      /* Extra large screens */
+      @media (min-width: 1025px) {
+        html {
+          font-size: 17px;
+        }
+      }
+
+      .page { min-height: 100vh; }
+      @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+      @keyframes slideUp { from { transform: translateY(8px) } to { transform: translateY(0) } }
+      .animate-page { animation: fadeIn 200ms ease-out, slideUp 240ms ease-out }
+
+      .ripple { position: relative; overflow: hidden; }
+      .ripple::after { content: ''; position: absolute; left: 50%; top: 50%; width: 0; height: 0; background: rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
+      .ripple:active::after { width: 200%; padding-bottom: 200%; transition: width 300ms ease-out, padding-bottom 300ms ease-out; }
+
+      /* Mobile-specific optimizations */
+      @media (max-width: 768px) {
+        .mobile-text-xs { font-size: 0.6rem !important; }
+        .mobile-text-sm { font-size: 0.7rem !important; }
+        .mobile-text-base { font-size: 0.8rem !important; }
+        .mobile-text-lg { font-size: 0.9rem !important; }
+        .mobile-text-xl { font-size: 1rem !important; }
+        .mobile-text-2xl { font-size: 1.1rem !important; }
+        
+        /* Reduce padding and margins on mobile */
+        .mobile-padding-reduced { padding: 0.5rem !important; }
+        .mobile-margin-reduced { margin: 0.5rem !important; }
+        
+        /* Smaller buttons on mobile */
+        .mobile-btn-sm { padding: 0.4rem 0.8rem !important; font-size: 0.8rem !important; }
+        .mobile-btn-md { padding: 0.5rem 1rem !important; font-size: 0.9rem !important; }
+        .mobile-btn-lg { padding: 0.6rem 1.2rem !important; font-size: 1rem !important; }
+      }
+      .orientation-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        z-index: 9999;
+      }
+      .orientation-overlay .box {
+        max-width: 420px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      @media (orientation: landscape) {
+        #root { display: none; }
+        .orientation-overlay { display: flex; }
+      }
+      @media (orientation: portrait) {
+        .orientation-overlay { display: none; }
+      }
+    </style>
+  <link rel="stylesheet" href="/index.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+<body>
+<div id="root" style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"></div>
+<div class="orientation-overlay">
+  <div class="box">
+    <div class="text-2xl font-bold mb-2">Gunakan mode potret</div>
+    <div class="text-sm text-gray-600">Aplikasi ini dioptimalkan untuk orientasi potret.</div>
+  </div>
+  </div>
+<script type="module" src="/index.tsx"></script>
+<script>
+  // Expose Firebase env for SW
+  self.FIREBASE_API_KEY = (window).FIREBASE_API_KEY || undefined;
+  self.FIREBASE_AUTH_DOMAIN = (window).FIREBASE_AUTH_DOMAIN || undefined;
+  self.FIREBASE_PROJECT_ID = (window).FIREBASE_PROJECT_ID || undefined;
+  self.FIREBASE_STORAGE_BUCKET = (window).FIREBASE_STORAGE_BUCKET || undefined;
+  self.FIREBASE_MESSAGING_SENDER_ID = (window).FIREBASE_MESSAGING_SENDER_ID || undefined;
+  self.FIREBASE_APP_ID = (window).FIREBASE_APP_ID || undefined;
+</script>
+</body>
+</html>

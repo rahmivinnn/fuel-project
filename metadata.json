@@ -1,0 +1,7 @@
+{
+  "name": "FuelFriendly",
+  "description": "An on-demand fuel delivery service application that connects you with nearby fuel stations and delivery partners. Order fuel, groceries, and track your delivery in real-time.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
