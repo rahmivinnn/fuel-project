@@ -12,6 +12,7 @@ const dataDir = path.join(process.cwd(), 'server', 'data')
 const ordersFile = path.join(dataDir, 'orders.json')
 const usersFile = path.join(dataDir, 'users.json')
 const tokensFile = path.join(dataDir, 'tokens.json')
+const fuelPricesFile = path.join(dataDir, 'fuelPrices.json')
 
 async function ensureData() {
   try { await fs.mkdir(dataDir, { recursive: true }) } catch {}
@@ -22,8 +23,13 @@ async function ensureData() {
 
 async function readOrders() {
   await ensureData()
-  const raw = await fs.readFile(ordersFile, 'utf-8')
-  try { return JSON.parse(raw) } catch { return [] }
+  try {
+    const raw = await fs.readFile(ordersFile, 'utf-8')
+    return JSON.parse(raw)
+  } catch (e) {
+    console.error('Error reading orders:', e)
+    return []
+  }
 }
 
 async function writeOrders(orders) {
@@ -33,8 +39,13 @@ async function writeOrders(orders) {
 
 async function readUsers() {
   await ensureData()
-  const raw = await fs.readFile(usersFile, 'utf-8')
-  try { return JSON.parse(raw) } catch { return [] }
+  try {
+    const raw = await fs.readFile(usersFile, 'utf-8')
+    return JSON.parse(raw)
+  } catch (e) {
+    console.error('Error reading users:', e)
+    return []
+  }
 }
 
 async function writeUsers(users) {
@@ -44,13 +55,34 @@ async function writeUsers(users) {
 
 async function readTokens() {
   await ensureData()
-  const raw = await fs.readFile(tokensFile, 'utf-8')
-  try { return JSON.parse(raw) } catch { return [] }
+  try {
+    const raw = await fs.readFile(tokensFile, 'utf-8')
+    return JSON.parse(raw)
+  } catch (e) {
+    console.error('Error reading tokens:', e)
+    return []
+  }
 }
 
 async function writeTokens(tokens) {
   await ensureData()
   await fs.writeFile(tokensFile, JSON.stringify(tokens, null, 2), 'utf-8')
+}
+
+async function readFuelPrices() {
+  await ensureData()
+  try {
+    const raw = await fs.readFile(fuelPricesFile, 'utf-8')
+    return JSON.parse(raw)
+  } catch (e) {
+    console.error('Error reading fuel prices:', e)
+    return []
+  }
+}
+
+async function writeFuelPrices(fuelPrices) {
+  await ensureData()
+  await fs.writeFile(fuelPricesFile, JSON.stringify(fuelPrices, null, 2), 'utf-8')
 }
 
 app.get('/api/ping', (req, res) => {
@@ -107,6 +139,7 @@ app.post('/api/auth/firebase', async (req, res) => {
     }
     res.json(user)
   } catch (e) {
+    console.error('Auth error:', e)
     res.status(500).json({ error: 'auth_failed' })
   }
 })
@@ -114,22 +147,32 @@ app.post('/api/auth/firebase', async (req, res) => {
 app.get('/api/user/me', async (req, res) => {
   const { email } = req.query
   if (!email) { res.status(400).json({ error: 'email required' }); return }
-  const users = await readUsers()
-  const user = users.find(u => u.email === email)
-  if (!user) { res.status(404).json({ error: 'not_found' }); return }
-  res.json(user)
+  try {
+    const users = await readUsers()
+    const user = users.find(u => u.email === email)
+    if (!user) { res.status(404).json({ error: 'not_found' }); return }
+    res.json(user)
+  } catch (e) {
+    console.error('Error fetching user:', e)
+    res.status(500).json({ error: 'server_error' })
+  }
 })
 
 app.patch('/api/user/me', async (req, res) => {
   const { email } = req.query
   const payload = req.body || {}
   if (!email) { res.status(400).json({ error: 'email required' }); return }
-  const users = await readUsers()
-  const idx = users.findIndex(u => u.email === email)
-  if (idx === -1) { res.status(404).json({ error: 'not_found' }); return }
-  users[idx] = { ...users[idx], ...payload }
-  await writeUsers(users)
-  res.json(users[idx])
+  try {
+    const users = await readUsers()
+    const idx = users.findIndex(u => u.email === email)
+    if (idx === -1) { res.status(404).json({ error: 'not_found' }); return }
+    users[idx] = { ...users[idx], ...payload }
+    await writeUsers(users)
+    res.json(users[idx])
+  } catch (e) {
+    console.error('Error updating user:', e)
+    res.status(500).json({ error: 'server_error' })
+  }
 })
 
 app.get('/api/stations', async (req, res) => {
@@ -178,49 +221,118 @@ app.get('/api/geocode', async (req, res) => {
   }
 })
 
+// Get fuel price history
+app.get('/api/fuel-prices/history', async (req, res) => {
+  try {
+    const { stationId, fuelType } = req.query
+    const fuelPrices = await readFuelPrices()
+    
+    // Filter by station and fuel type if provided
+    let filteredPrices = fuelPrices
+    if (stationId) {
+      filteredPrices = filteredPrices.filter(p => p.stationId === stationId)
+    }
+    if (fuelType) {
+      filteredPrices = filteredPrices.filter(p => p.fuelType === fuelType)
+    }
+    
+    // Sort by date
+    filteredPrices.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    
+    res.json(filteredPrices)
+  } catch (e) {
+    console.error('Error fetching fuel price history:', e)
+    res.status(500).json({ error: 'server_error' })
+  }
+})
+
+// Add new fuel price record
+app.post('/api/fuel-prices', async (req, res) => {
+  try {
+    const { stationId, fuelType, price } = req.body
+    
+    if (!stationId || !fuelType || price === undefined) {
+      res.status(400).json({ error: 'stationId, fuelType, and price are required' })
+      return
+    }
+    
+    const newRecord = {
+      id: `fuel-${Date.now()}`,
+      stationId,
+      fuelType,
+      price: parseFloat(price),
+      date: new Date().toISOString()
+    }
+    
+    const fuelPrices = await readFuelPrices()
+    fuelPrices.push(newRecord)
+    await writeFuelPrices(fuelPrices)
+    
+    res.status(201).json(newRecord)
+  } catch (e) {
+    console.error('Error adding fuel price:', e)
+    res.status(500).json({ error: 'server_error' })
+  }
+})
+
 app.get('/api/orders', async (req, res) => {
-  const orders = await readOrders()
-  res.json(orders)
+  try {
+    const orders = await readOrders()
+    res.json(orders)
+  } catch (e) {
+    console.error('Error fetching orders:', e)
+    res.status(500).json({ error: 'server_error' })
+  }
 })
 
 app.post('/api/orders', async (req, res) => {
-  const order = req.body || {}
-  const id = `order-${Date.now()}`
-  const newOrder = { ...order, id }
-  const orders = await readOrders()
-  orders.unshift(newOrder)
-  await writeOrders(orders)
-  // Try to send push notification if tokens exist
   try {
-    const tokens = await readTokens()
-    await sendPush(tokens.map(t => t.token), {
-      title: 'Order Created',
-      body: `Tracking ${newOrder.trackingNo}`
-    })
-  } catch {}
-  res.status(201).json(newOrder)
+    const order = req.body || {}
+    const id = `order-${Date.now()}`
+    const newOrder = { ...order, id }
+    const orders = await readOrders()
+    orders.unshift(newOrder)
+    await writeOrders(orders)
+    // Try to send push notification if tokens exist
+    try {
+      const tokens = await readTokens()
+      await sendPush(tokens.map(t => t.token), {
+        title: 'Order Created',
+        body: `Tracking ${newOrder.trackingNo}`
+      })
+    } catch {}
+    res.status(201).json(newOrder)
+  } catch (e) {
+    console.error('Error creating order:', e)
+    res.status(500).json({ error: 'server_error' })
+  }
 })
 
 app.patch('/api/orders/:id/status', async (req, res) => {
-  const { id } = req.params
-  const { status } = req.body || {}
-  const orders = await readOrders()
-  const idx = orders.findIndex(o => o.id === id)
-  if (idx === -1) {
-    res.status(404).json({ error: 'not_found' })
-    return
-  }
-  orders[idx] = { ...orders[idx], status }
-  await writeOrders(orders)
-  // Push notification on status update
   try {
-    const tokens = await readTokens()
-    await sendPush(tokens.map(t => t.token), {
-      title: 'Order Updated',
-      body: `Order ${id} is now ${status}`
-    })
-  } catch {}
-  res.json(orders[idx])
+    const { id } = req.params
+    const { status } = req.body || {}
+    const orders = await readOrders()
+    const idx = orders.findIndex(o => o.id === id)
+    if (idx === -1) {
+      res.status(404).json({ error: 'not_found' })
+      return
+    }
+    orders[idx] = { ...orders[idx], status }
+    await writeOrders(orders)
+    // Push notification on status update
+    try {
+      const tokens = await readTokens()
+      await sendPush(tokens.map(t => t.token), {
+        title: 'Order Updated',
+        body: `Order ${id} is now ${status}`
+      })
+    } catch {}
+    res.json(orders[idx])
+  } catch (e) {
+    console.error('Error updating order status:', e)
+    res.status(500).json({ error: 'server_error' })
+  }
 })
 
 app.get('/api/station/:id', async (req, res) => {
@@ -268,7 +380,9 @@ app.get('/api/station/:id', async (req, res) => {
 })
 
 const port = process.env.PORT || 4000
-app.listen(port, () => {})
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`)
+})
 
 // --- Push Notification via FCM legacy API ---
 async function sendPush(registrationTokens, payload) {
@@ -295,26 +409,32 @@ async function sendPush(registrationTokens, payload) {
 
 // Register FCM token
 app.post('/api/notifications/register', async (req, res) => {
-  const { email, token } = req.body || {}
-  if (!token) { res.status(400).json({ error: 'token required' }); return }
-  const tokens = await readTokens()
-  const existingIdx = tokens.findIndex(t => t.token === token)
-  if (existingIdx !== -1) {
-    tokens[existingIdx] = { email, token }
-  } else {
-    tokens.push({ email, token })
+  try {
+    const { email, token } = req.body || {}
+    if (!token) { res.status(400).json({ error: 'token required' }); return }
+    const tokens = await readTokens()
+    const existingIdx = tokens.findIndex(t => t.token === token)
+    if (existingIdx !== -1) {
+      tokens[existingIdx] = { email, token }
+    } else {
+      tokens.push({ email, token })
+    }
+    await writeTokens(tokens)
+    res.json({ ok: true })
+  } catch (e) {
+    console.error('Error registering token:', e)
+    res.status(500).json({ error: 'server_error' })
   }
-  await writeTokens(tokens)
-  res.json({ ok: true })
 })
 
 // Send test push
 app.post('/api/notifications/test', async (req, res) => {
-  const { token } = req.body || {}
   try {
+    const { token } = req.body || {}
     await sendPush(token ? [token] : (await readTokens()).map(t => t.token), { title: 'FuelFriendly', body: 'Test notification' })
     res.json({ ok: true })
   } catch (e) {
+    console.error('Error sending test push:', e)
     res.status(500).json({ error: 'push_failed' })
   }
 })

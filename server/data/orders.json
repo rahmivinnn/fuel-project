@@ -1,1 +1,31 @@
-[]
+[
+  {
+    "id": "order-12345",
+    "trackingNo": "TRK-12345",
+    "status": "Ongoing",
+    "fuelFriend": {
+      "name": "Marcus Johnson",
+      "location": "5 km away",
+      "avatarUrl": "https://i.pravatar.cc/150?img=3"
+    },
+    "items": [
+      {
+        "name": "Petrol",
+        "price": 50.00
+      },
+      {
+        "name": "Groceries",
+        "price": 25.50
+      }
+    ],
+    "fuelCost": 50.00,
+    "deliveryFee": 5.00,
+    "totalAmount": 80.50,
+    "deliveryTime": "15 mins",
+    "vehicle": {
+      "brand": "Toyota",
+      "color": "Blue",
+      "licenseNumber": "ABC-123"
+    }
+  }
+]

@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="FuelFriendly">
+    <meta name="theme-color" content="#32B768">
     <title>FuelFriendly</title>
     <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,11 +26,11 @@
                 dark: '#28A358'
               },
               dark: {
-                bg: '#181A20',
-                card: '#1F222A',
+                bg: '#000000',
+                card: '#1C1C1E',
                 text: '#FFFFFF',
                 subtext: '#E0E0E0',
-                border: '#35383F',
+                border: '#2C2C2E',
               },
               light: {
                 bg: '#FFFFFF',
@@ -38,16 +41,13 @@
               }
             },
             fontSize: {
-              xs: ['0.6rem', { lineHeight: '0.75rem' }],
-              sm: ['0.7rem', { lineHeight: '1rem' }],
-              base: ['0.8rem', { lineHeight: '1.25rem' }],
-              lg: ['0.9rem', { lineHeight: '1.4rem' }],
-              xl: ['1rem', { lineHeight: '1.5rem' }],
-              '2xl': ['1.1rem', { lineHeight: '1.6rem' }],
-              '3xl': ['1.2rem', { lineHeight: '1.7rem' }],
-              '4xl': ['1.3rem', { lineHeight: '1.8rem' }],
-              '5xl': ['1.4rem', { lineHeight: '1.9rem' }],
-              '6xl': ['1.5rem', { lineHeight: '2rem' }],
+              xs: ['0.75rem', { lineHeight: '1rem' }],
+              sm: ['0.875rem', { lineHeight: '1.25rem' }],
+              base: ['1rem', { lineHeight: '1.5rem' }],
+              lg: ['1.125rem', { lineHeight: '1.75rem' }],
+              xl: ['1.25rem', { lineHeight: '1.75rem' }],
+              '2xl': ['1.5rem', { lineHeight: '2rem' }],
+              '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
             }
           }
         },
@@ -61,6 +61,13 @@
         -moz-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         text-size-adjust: 100%;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
       }
       h1, h2, h3, h4, h5, h6 { font-weight: 700; }
       .font-semibold { font-weight: 600 !important; }
@@ -68,99 +75,282 @@
       
       /* Responsive font sizing for all screen sizes */
       html {
-        font-size: 16px; /* Base font size */
+        font-size: 12px; /* Base font size */
       }
       
-      /* Small screens (phones) */
-      @media (max-width: 480px) {
+      @media (min-width: 375px) {
+        html {
+          font-size: 13px;
+        }
+      }
+      
+      @media (min-width: 414px) {
         html {
           font-size: 14px;
         }
       }
       
-      /* Medium screens (tablets) */
-      @media (min-width: 481px) and (max-width: 768px) {
-        html {
-          font-size: 15px;
-        }
-      }
-      
-      /* Large screens (desktops) */
-      @media (min-width: 769px) and (max-width: 1024px) {
+      @media (min-width: 769px) {
         html {
           font-size: 16px;
         }
-      }
-      
-      /* Extra large screens */
-      @media (min-width: 1025px) {
-        html {
-          font-size: 17px;
+        #root {
+          max-width: 480px;
+          left: 50%;
+          transform: translateX(-50%);
         }
       }
 
+      html, body, #root {
+        height: 100vh;
+        height: 100dvh;
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+      
+      #root > * {
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      
+      /* Hardware acceleration for smooth animations */
+      * {
+        -webkit-transform: translateZ(0);
+        -moz-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        -o-transform: translateZ(0);
+        transform: translateZ(0);
+        will-change: transform;
+      }
+      
       .page { min-height: 100vh; }
-      @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-      @keyframes slideUp { from { transform: translateY(8px) } to { transform: translateY(0) } }
-      .animate-page { animation: fadeIn 200ms ease-out, slideUp 240ms ease-out }
-
-      .ripple { position: relative; overflow: hidden; }
-      .ripple::after { content: ''; position: absolute; left: 50%; top: 50%; width: 0; height: 0; background: rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
-      .ripple:active::after { width: 200%; padding-bottom: 200%; transition: width 300ms ease-out, padding-bottom 300ms ease-out; }
-
+      
+      /* Enhanced page animations with smoother easing */
+      @keyframes fadeInSmooth {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideUpSmooth {
+        from { 
+          transform: translateY(12px);
+          opacity: 0;
+        }
+        to { 
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideInFromRight {
+        from {
+          transform: translateX(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideInFromLeft {
+        from {
+          transform: translateX(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes scaleInSmooth {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes bounceIn {
+        0% {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      
+      /* Shake animation for errors */
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+      }
+      
+      /* Improved animation classes with better timing functions */
+      .animate-page-smooth {
+        animation: fadeInSmooth 0.3s cubic-bezier(0.22, 0.61, 0.36, 1),
+                   slideUpSmooth 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      
+      .animate-slide-in-right {
+        animation: slideInFromRight 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      
+      .animate-slide-in-left {
+        animation: slideInFromLeft 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      
+      .animate-scale-in-smooth {
+        animation: scaleInSmooth 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      
+      .animate-bounce-in {
+        animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      
+      .animate-shake {
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      }
+      
+      /* Enhanced ripple effect with smoother animation */
+      .ripple { 
+        position: relative; 
+        overflow: hidden; 
+        transform: translate3d(0, 0, 0);
+      }
+      
+      .ripple::after { 
+        content: ''; 
+        position: absolute; 
+        left: 50%; 
+        top: 50%; 
+        width: 0; 
+        height: 0; 
+        background: rgba(255,255,255,0.2); 
+        border-radius: 50%; 
+        transform: translate(-50%, -50%); 
+        transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), 
+                    height 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+                    opacity 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      
+      .ripple:active::after { 
+        width: 200%; 
+        height: 200%;
+        opacity: 0;
+      }
+      
+      /* Enhanced button press effect with smoother transitions */
+      .btn-press {
+        transition: transform 0.15s cubic-bezier(0.22, 0.61, 0.36, 1), 
+                    box-shadow 0.15s cubic-bezier(0.22, 0.61, 0.36, 1),
+                    background-color 0.15s cubic-bezier(0.22, 0.61, 0.36, 1);
+        transform-origin: center;
+      }
+      
+      .btn-press:active {
+        transform: scale(0.97);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      
+      /* Smooth card hover effects */
+      .card-hover {
+        transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1),
+                    box-shadow 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      
+      .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      }
+      
+      /* Enhanced input focus animations */
+      .input-focus {
+        transition: all 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      
+      .input-focus:focus {
+        transform: scale(1.01);
+      }
+      
       /* Mobile-specific optimizations */
       @media (max-width: 768px) {
-        .mobile-text-xs { font-size: 0.6rem !important; }
-        .mobile-text-sm { font-size: 0.7rem !important; }
-        .mobile-text-base { font-size: 0.8rem !important; }
-        .mobile-text-lg { font-size: 0.9rem !important; }
-        .mobile-text-xl { font-size: 1rem !important; }
-        .mobile-text-2xl { font-size: 1.1rem !important; }
+        .mobile-text-xs { font-size: 0.65rem !important; }
+        .mobile-text-sm { font-size: 0.75rem !important; }
+        .mobile-text-base { font-size: 0.85rem !important; }
+        .mobile-text-lg { font-size: 0.95rem !important; }
+        .mobile-text-xl { font-size: 1.05rem !important; }
+        .mobile-text-2xl { font-size: 1.15rem !important; }
         
         /* Reduce padding and margins on mobile */
-        .mobile-padding-reduced { padding: 0.5rem !important; }
-        .mobile-margin-reduced { margin: 0.5rem !important; }
+        .mobile-padding-reduced { padding: 0.4rem !important; }
+        .mobile-margin-reduced { margin: 0.4rem !important; }
         
         /* Smaller buttons on mobile */
-        .mobile-btn-sm { padding: 0.4rem 0.8rem !important; font-size: 0.8rem !important; }
-        .mobile-btn-md { padding: 0.5rem 1rem !important; font-size: 0.9rem !important; }
-        .mobile-btn-lg { padding: 0.6rem 1.2rem !important; font-size: 1rem !important; }
+        .mobile-btn-sm { padding: 0.35rem 0.7rem !important; font-size: 0.75rem !important; }
+        .mobile-btn-md { padding: 0.45rem 0.9rem !important; font-size: 0.85rem !important; }
+        .mobile-btn-lg { padding: 0.55rem 1.1rem !important; font-size: 0.95rem !important; }
       }
-      .orientation-overlay {
-        position: fixed;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        background: #ffffff;
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-        z-index: 9999;
+      
+      /* Smooth scrolling with momentum */
+      * {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-overflow-scrolling: touch;
       }
-      .orientation-overlay .box {
-        max-width: 420px;
-        margin: 0 auto;
-        text-align: center;
+      
+      /* Optimize rendering performance */
+      img, video {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
       }
-      @media (orientation: landscape) {
-        #root { display: none; }
-        .orientation-overlay { display: flex; }
+      
+      /* Prevent layout shifts */
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
       }
-      @media (orientation: portrait) {
-        .orientation-overlay { display: none; }
+      
+      /* Remove default scrollbar */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+      
+      /* Enhanced loading spinner animation */
+      @keyframes spinSmooth {
+        to { transform: rotate(360deg); }
+      }
+      
+      .animate-spin-smooth {
+        animation: spinSmooth 0.8s linear infinite;
       }
     </style>
-  <link rel="stylesheet" href="/index.css">
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
 <body>
-<div id="root" style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"></div>
-<div class="orientation-overlay">
-  <div class="box">
-    <div class="text-2xl font-bold mb-2">Gunakan mode potret</div>
-    <div class="text-sm text-gray-600">Aplikasi ini dioptimalkan untuk orientasi potret.</div>
-  </div>
-  </div>
+<div id="root" style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); width: 100vw; height: 100vh; margin: 0 auto;"></div>
 <script type="module" src="/index.tsx"></script>
 <script>
   // Expose Firebase env for SW

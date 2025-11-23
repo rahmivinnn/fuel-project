@@ -1,0 +1,58 @@
+[
+  {
+    "id": "fuel-1",
+    "stationId": "osm-12345",
+    "fuelType": "regular",
+    "price": 3.45,
+    "date": "2025-11-01T10:00:00Z"
+  },
+  {
+    "id": "fuel-2",
+    "stationId": "osm-12345",
+    "fuelType": "regular",
+    "price": 3.42,
+    "date": "2025-11-08T10:00:00Z"
+  },
+  {
+    "id": "fuel-3",
+    "stationId": "osm-12345",
+    "fuelType": "regular",
+    "price": 3.39,
+    "date": "2025-11-15T10:00:00Z"
+  },
+  {
+    "id": "fuel-4",
+    "stationId": "osm-12345",
+    "fuelType": "regular",
+    "price": 3.41,
+    "date": "2025-11-22T10:00:00Z"
+  },
+  {
+    "id": "fuel-5",
+    "stationId": "osm-67890",
+    "fuelType": "regular",
+    "price": 3.50,
+    "date": "2025-11-01T10:00:00Z"
+  },
+  {
+    "id": "fuel-6",
+    "stationId": "osm-67890",
+    "fuelType": "regular",
+    "price": 3.48,
+    "date": "2025-11-08T10:00:00Z"
+  },
+  {
+    "id": "fuel-7",
+    "stationId": "osm-67890",
+    "fuelType": "regular",
+    "price": 3.45,
+    "date": "2025-11-15T10:00:00Z"
+  },
+  {
+    "id": "fuel-8",
+    "stationId": "osm-67890",
+    "fuelType": "regular",
+    "price": 3.47,
+    "date": "2025-11-22T10:00:00Z"
+  }
+]

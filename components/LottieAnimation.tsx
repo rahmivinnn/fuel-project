@@ -7,6 +7,8 @@ interface LottieAnimationProps {
     height?: number;
     loop?: boolean;
     autoplay?: boolean;
+    speed?: number;
+    className?: string;
 }
 
 const LottieAnimation: React.FC<LottieAnimationProps> = ({ 
@@ -14,7 +16,9 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
     width = 100, 
     height = 100, 
     loop = true, 
-    autoplay = true 
+    autoplay = true,
+    speed = 1,
+    className = ''
 }) => {
     const style = {
         width: `${width}px`,
@@ -22,12 +26,15 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
     };
 
     return (
-        <Lottie 
-            animationData={animationData} 
-            style={style}
-            loop={loop}
-            autoplay={autoplay}
-        />
+        <div className={`transition-all duration-300 ease-out ${className}`}>
+            <Lottie 
+                animationData={animationData} 
+                style={style}
+                loop={loop}
+                autoplay={autoplay}
+                speed={speed}
+            />
+        </div>
     );
 };
 

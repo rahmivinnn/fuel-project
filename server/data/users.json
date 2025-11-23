@@ -1,1 +1,89 @@
-[]
+[
+  {
+    "id": "user-1763356639576",
+    "fullName": "Vina Zhaf",
+    "email": "zhafvina@gmail.com",
+    "phone": "",
+    "city": "",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocKbu8MHpUxZlF8YyyjjtygMETGLHOAcsvjItdMdvBEAE8xW0g=s96-c",
+    "vehicles": []
+  },
+  {
+    "id": "user-1763357469978",
+    "fullName": "rahmivina230",
+    "email": "rahmivina230@gmail.com",
+    "phone": "082116773891",
+    "city": "",
+    "avatarUrl": "",
+    "vehicles": [
+      {
+        "id": "v-1763357469985",
+        "brand": "yamaha",
+        "color": "red",
+        "licenseNumber": "13131",
+        "fuelType": "Diesel"
+      }
+    ]
+  },
+  {
+    "id": "user-1763357884815",
+    "fullName": "shafira dev",
+    "email": "shafiradev62@gmail.com",
+    "phone": "",
+    "city": "",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocK_nhuTpTplOE8lNYd0qU6zEmBirwoqej9HV9JU5Uwb7B1DkUU=s96-c",
+    "vehicles": []
+  },
+  {
+    "id": "user-1763358842752",
+    "fullName": "admin",
+    "email": "admin@fuelfriendly.com",
+    "phone": "",
+    "city": "",
+    "avatarUrl": "https://ui-avatars.com/api/?name=admin&background=random",
+    "vehicles": []
+  },
+  {
+    "id": "user-1763360800521",
+    "fullName": "admin",
+    "email": "admin@gmail.com",
+    "phone": "082116773891",
+    "city": "",
+    "avatarUrl": "",
+    "vehicles": [
+      {
+        "id": "v-1763360800532",
+        "brand": "yamaha",
+        "color": "red",
+        "licenseNumber": "13131",
+        "fuelType": "Petrol"
+      }
+    ]
+  },
+  {
+    "id": "user-1763384740593",
+    "fullName": "rezapahlawan712",
+    "email": "rezapahlawan712@gmail.com",
+    "phone": "082116773891",
+    "city": "",
+    "avatarUrl": "",
+    "vehicles": [
+      {
+        "id": "v-1763384740715",
+        "brand": "yamaha",
+        "color": "red",
+        "licenseNumber": "13131",
+        "fuelType": "Petrol"
+      }
+    ]
+  },
+  {
+    "id": "user-1763703146380",
+    "fullName": "rahmivina23",
+    "email": "rahmivina23@student.upi.edu",
+    "phone": "",
+    "city": "",
+    "avatarUrl": "https://ui-avatars.com/api/?name=rahmivina23&background=random",
+    "vehicles": []
+  }
+]

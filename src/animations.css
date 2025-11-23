@@ -1,0 +1,266 @@
+/* Enhanced Animations and Transitions */
+
+/* Page Transitions */
+.animate-page-enter {
+  animation: fadeInUp 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth Card Animations */
+.card-smooth {
+  transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.card-smooth:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-smooth:active {
+  transform: scale(0.98);
+}
+
+/* Button Interactions */
+.btn-smooth {
+  transition: all 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transform-origin: center;
+}
+
+.btn-smooth:hover {
+  transform: scale(1.02);
+}
+
+.btn-smooth:active {
+  transform: scale(0.97);
+}
+
+/* Input Field Animations */
+.input-smooth {
+  transition: all 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.input-smooth:focus {
+  transform: scale(1.01);
+  box-shadow: 0 0 0 3px rgba(50, 183, 104, 0.2);
+}
+
+/* Modal Animations */
+.modal-enter {
+  animation: modalSlideIn 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-exit {
+  animation: modalSlideOut 0.2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+}
+
+/* Loading Animations */
+.loading-pulse {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Notification Animations */
+.notification-enter {
+  animation: slideInFromTop 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-100%) translateX(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+  }
+}
+
+.notification-exit {
+  animation: slideOutToTop 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes slideOutToTop {
+  from {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%) translateX(-50%);
+  }
+}
+
+/* Element Reveal Animations */
+.reveal-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.reveal-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.reveal-delay-3 {
+  animation-delay: 0.3s;
+}
+
+.reveal-delay-4 {
+  animation-delay: 0.4s;
+}
+
+.reveal-delay-5 {
+  animation-delay: 0.5s;
+}
+
+.reveal-item {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: revealItem 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes revealItem {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Micro-interactions */
+.interactive-element {
+  transition: transform 0.15s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.interactive-element:active {
+  transform: scale(0.96);
+}
+
+/* Smooth Scrolling */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .mobile-container {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  
+  .mobile-text-xs { font-size: 0.65rem !important; }
+  .mobile-text-sm { font-size: 0.75rem !important; }
+  .mobile-text-base { font-size: 0.875rem !important; }
+  .mobile-text-lg { font-size: 1rem !important; }
+  .mobile-text-xl { font-size: 1.125rem !important; }
+  
+  .mobile-padding-xs { padding: 0.25rem !important; }
+  .mobile-padding-sm { padding: 0.5rem !important; }
+  .mobile-padding-md { padding: 0.75rem !important; }
+  
+  .mobile-margin-xs { margin: 0.25rem !important; }
+  .mobile-margin-sm { margin: 0.5rem !important; }
+  .mobile-margin-md { margin: 0.75rem !important; }
+  
+  .mobile-btn-xs { 
+    padding: 0.25rem 0.5rem !important; 
+    font-size: 0.75rem !important; 
+  }
+  .mobile-btn-sm { 
+    padding: 0.5rem 0.75rem !important; 
+    font-size: 0.875rem !important; 
+  }
+  
+  .mobile-rounded-sm { border-radius: 0.25rem !important; }
+  .mobile-rounded-md { border-radius: 0.375rem !important; }
+  .mobile-rounded-lg { border-radius: 0.5rem !important; }
+  
+  /* Prevent text selection on mobile */
+  .no-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Optimize for mobile touch targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Overlay Animations */
+.overlay-fade-in {
+  animation: overlayFadeIn 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.overlay-fade-out {
+  animation: overlayFadeOut 0.2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes overlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

@@ -62,6 +62,14 @@ export interface FuelFriend {
 
 export type OrderStatus = 'Ongoing' | 'Completed' | 'Canceled';
 
+export interface FuelPriceHistory {
+    id: string;
+    stationId: string;
+    fuelType: 'regular' | 'premium' | 'diesel';
+    price: number;
+    date: string; // ISO date string
+}
+
 export interface Order {
     id: string;
     trackingNo: string;

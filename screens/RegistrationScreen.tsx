@@ -1,33 +1,66 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Eye, EyeOff, Plus, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Check, Eye, EyeOff, Plus, ChevronDown, Car } from 'lucide-react';
 import { useAppContext } from '../App';
 import { apiRegister, apiLoginWithGoogleCredential } from '../services/api';
 import { createUserWithEmailAndPassword, auth } from '../firebase';
-import carIcon from './Vector.png';
 import Logo from '../components/Logo';
 import AnimatedPage from '../components/AnimatedPage';
 
 const Stepper = ({ currentStep }: { currentStep: number }) => {
-    const steps = [1, 2, 3];
+    const steps = [
+        { number: 1, label: 'Account' },
+        { number: 2, label: 'Vehicle' },
+        { number: 3, label: 'Review' }
+    ];
+    
     return (
-        <div className="flex items-center justify-center w-full my-8">
-            {steps.map((step, index) => (
-                <React.Fragment key={step}>
-                    <div className="flex flex-col items-center">
-                        <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
-                                currentStep > step ? 'bg-primary text-white' : currentStep === step ? 'border-2 border-primary text-primary' : 'border-2 border-gray-300 text-gray-400'
-                            }`}
-                            style={{ position: 'relative' }}
-                        >
-                            {currentStep > step ? <Check size={20} /> : step}
-                        </div>
+        <div className="flex items-center justify-between w-full my-6 relative px-4">
+            {/* Progress line */}
+            <div className="absolute top-5 left-4 right-4 h-0.5 bg-gray-300 dark:bg-gray-700 z-0"></div>
+            <div 
+                className="absolute top-5 left-4 h-0.5 bg-primary z-0 transition-all duration-500 ease-in-out"
+                style={{ width: `${(currentStep - 1) * 50}%` }}
+            ></div>
+            
+            {/* Car icon that moves along the progress line */}
+            <div 
+                className="absolute top-5 transition-all duration-500 ease-in-out z-10"
+                style={{ 
+                    left: `${(currentStep - 1) * 50}%`,
+                    transform: 'translate(-50%, -50%)'
+                }}
+            >
+                <div className="relative">
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <Car size={16} className="text-white" />
                     </div>
-                    {index < steps.length - 1 && (
-                        <div className={`flex-1 border-t border-dashed transition-colors duration-300 ${currentStep > step ? 'border-primary' : 'border-gray-300'}`}></div>
-                    )}
-                </React.Fragment>
+                </div>
+            </div>
+            
+            {steps.map((step, index) => (
+                <div key={step.number} className="flex flex-col items-center relative z-20">
+                    <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
+                            currentStep > step.number 
+                                ? 'bg-primary text-white' 
+                                : currentStep === step.number 
+                                    ? 'border-2 border-primary text-primary bg-white dark:bg-dark-bg' 
+                                    : 'border-2 border-gray-300 text-gray-400 bg-white dark:bg-dark-bg'
+                        }`}
+                    >
+                        {currentStep > step.number ? <Check size={20} /> : step.number}
+                    </div>
+                    <div className={`mt-2 text-xs font-medium ${
+                        currentStep === step.number 
+                            ? 'text-primary' 
+                            : currentStep > step.number 
+                                ? 'text-primary' 
+                                : 'text-gray-500 dark:text-gray-400'
+                    }`}>
+                        {step.label}
+                    </div>
+                </div>
             ))}
         </div>
     );
@@ -47,6 +80,7 @@ const RegistrationScreen = () => {
         licenseNumber: '',
         fuelType: 'Petrol',
     });
+    const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
     const handleNext = () => setStep(s => s + 1);
     const handleBack = () => {
@@ -58,15 +92,49 @@ const RegistrationScreen = () => {
     };
     
     const createAccount = async () => {
+        setIsCreatingAccount(true);
         try {
+            // First, create the user with email and password
             const cred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            
+            // Get the ID token for the newly created user
             const idToken = await cred.user.getIdToken(true);
+            
+            // Login with the Google credential (this might be misnamed in the original code)
+            // This is actually just using the Firebase ID token to authenticate with your backend
             const userData = await apiLoginWithGoogleCredential(idToken);
-            await apiRegister({ ...formData, email: userData.email, fullName: userData.fullName });
-            updateUser(userData);
-        } catch (error) {
+            
+            // Register the user profile with additional data
+            const registeredUser = await apiRegister({ 
+                ...formData, 
+                email: userData.email, 
+                fullName: userData.fullName,
+                city: userData.city || ''
+            });
+            
+            // Update the app context with the registered user
+            updateUser(registeredUser);
+            
+            // Navigate to home screen after successful registration
+            navigate('/home');
+        } catch (error: any) {
             console.error("Registration failed:", error);
-            alert("Registration failed. Please try again.");
+            let errorMessage = "Registration failed. Please try again.";
+            
+            // Provide more specific error messages
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage = "This email is already registered. Please use a different email or log in instead.";
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = "Please enter a valid email address.";
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage = "Password should be at least 6 characters.";
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            alert(errorMessage);
+        } finally {
+            setIsCreatingAccount(false);
         }
     };
 
@@ -81,7 +149,7 @@ const RegistrationScreen = () => {
             case 2:
                 return <Step2 next={handleNext} formData={formData} handleChange={handleChange} />;
             case 3:
-                return <Step3 createAccount={createAccount} editDetails={() => setStep(1)} formData={formData} />;
+                return <Step3 createAccount={createAccount} editDetails={() => setStep(1)} formData={formData} isCreatingAccount={isCreatingAccount} />;
             default:
                 return <Step1 next={handleNext} formData={formData} handleChange={handleChange} />;
         }
@@ -89,23 +157,20 @@ const RegistrationScreen = () => {
 
     return (
         <AnimatedPage>
-        <div className="min-h-screen flex flex-col p-6 bg-white dark:bg-dark-bg text-light-text dark:text-dark-text">
-            <header className="flex items-center space-x-2 mb-3">
+        <div className="min-h-screen flex flex-col items-center justify-start p-4 pt-6 bg-white dark:bg-dark-bg text-light-text dark:text-dark-text space-y-4">
+            <div className="flex items-center justify-between w-full max-w-sm mb-4">
                 <button onClick={handleBack} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-card">
                     <ArrowLeft size={24} />
                 </button>
-                <button onClick={handleBack} className="text-sm">Back</button>
-            </header>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-700 dark:text-gray-200 text-center flex-1">Registration</h2>
+                <div className="w-10"></div> {/* Spacer for alignment */}
+            </div>
             
-            <div className="flex flex-col items-center">
-                <Logo />
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-700 dark:text-gray-200 text-center">Registration</h2>
-                <div className="relative w-full max-w-sm pb-6 mb-2">
-                    <Stepper currentStep={step} />
-                </div>
+            <div className="w-full max-w-sm">
+                <Stepper currentStep={step} />
             </div>
 
-            <div className="flex-grow">
+            <div className="w-full max-w-sm flex-grow">
                 {renderStep()}
             </div>
         </div>
@@ -170,12 +235,12 @@ const Step1 = ({ next, formData, handleChange }: StepProps) => {
     }
     
     return (
-        <form onSubmit={handleFormSubmit} className="space-y-6">
-            <input name="fullName" type="text" placeholder="Full Name" value={formData.fullName} onChange={handleChange} className="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary" required />
-            <input name="email" type="email" placeholder="Email address" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary" required />
+        <form onSubmit={handleFormSubmit} className="space-y-3">
+            <input name="fullName" type="text" placeholder="Full Name" value={formData.fullName} onChange={handleChange} className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm" required />
+            <input name="email" type="email" placeholder="Email address" value={formData.email} onChange={handleChange} className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm" required />
             <div className="relative rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden">
                 <div className="flex items-center">
-                    <button ref={countryBtnRef} type="button" onClick={() => { setIsCountryOpen(true); loadCountries(); }} className="px-3 py-3 flex items-center space-x-2">
+                    <button ref={countryBtnRef} type="button" onClick={() => { setIsCountryOpen(true); loadCountries(); }} className="px-3 py-2 flex items-center space-x-2 text-sm mobile-text-sm">
                         <span>{selectedCountry.flag}</span>
                         <span className="text-gray-700 dark:text-gray-300">{selectedCountry.code}</span>
                         <ChevronDown size={16} className="text-gray-400" />
@@ -188,26 +253,26 @@ const Step1 = ({ next, formData, handleChange }: StepProps) => {
                         value={formData.phone} 
                         onChange={handleChange} 
                         autoComplete="tel"
-                        className="flex-1 pr-2 py-3 bg-transparent focus:outline-none" 
-                        style={{ paddingLeft: 16 }}
+                        className="flex-1 pr-2 py-2 bg-transparent focus:outline-none text-sm mobile-text-sm" 
+                        style={{ paddingLeft: 12 }}
                         required 
                     />
                 </div>
                 
             </div>
             <div className="relative">
-                <input name="password" type={showPassword ? "text" : "password"} placeholder="Password" value={formData.password} onChange={handleChange} className="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary" required />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400">
-                    {showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
+                <input name="password" type={showPassword ? "text" : "password"} placeholder="Password" value={formData.password} onChange={handleChange} className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm" required />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">
+                    {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
                 </button>
             </div>
             <div className="relative">
-                <input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary" required />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400">
-                    {showConfirmPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
+                <input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm" required />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">
+                    {showConfirmPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
                 </button>
             </div>
-            <button type="submit" className="w-full mt-4 bg-primary text-white py-4 rounded-full text-lg font-semibold ripple">Next</button>
+            <button type="submit" className="w-full mt-4 bg-primary text-white py-2.5 rounded-full text-base font-semibold shadow-lg transition-all active:scale-95 hover:shadow-xl flex items-center justify-center mobile-btn-md ripple">Next</button>
             {isCountryOpen && (
                 <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setIsCountryOpen(false)}>
                     <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-dark-card rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -218,7 +283,7 @@ const Step1 = ({ next, formData, handleChange }: StepProps) => {
                                 value={countryQuery}
                                 onChange={(e) => setCountryQuery(e.target.value)}
                                 placeholder="Search country or code"
-                                className="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-700 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm"
                             />
                         </div>
                         {loadingCountries && <div className="py-4 text-center">Loading...</div>}
@@ -231,9 +296,9 @@ const Step1 = ({ next, formData, handleChange }: StepProps) => {
                             <button key={`${c.name}-${c.code}`} onClick={() => { setSelectedCountry(c); setIsCountryOpen(false); }} className="w-full flex items-center justify-between py-3">
                                 <span className="flex items-center space-x-2">
                                     <span>{c.flag}</span>
-                                    <span>{c.name}</span>
+                                    <span className="text-sm mobile-text-sm">{c.name}</span>
                                 </span>
-                                <span className="text-gray-700 dark:text-gray-300">{c.code}</span>
+                                <span className="text-gray-700 dark:text-gray-300 text-sm mobile-text-sm">{c.code}</span>
                             </button>
                         ))}
                     </div>
@@ -243,34 +308,57 @@ const Step1 = ({ next, formData, handleChange }: StepProps) => {
     );
 };
 
-const Step2 = ({ next, formData, handleChange }: StepProps) => (
-    <form onSubmit={(e) => { e.preventDefault(); next(); }} className="space-y-6">
-        <input name="vehicleBrand" type="text" placeholder="Vehicle Brand" value={formData.vehicleBrand} onChange={handleChange} className="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary" required />
-        <input name="vehicleColor" type="text" placeholder="Vehicle Color" value={formData.vehicleColor} onChange={handleChange} className="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary" required />
-        <input name="licenseNumber" type="text" placeholder="License Number" value={formData.licenseNumber} onChange={handleChange} className="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary" required />
-        <select name="fuelType" value={formData.fuelType} onChange={handleChange} className="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary appearance-none">
-            <option>Petrol</option>
-            <option>Diesel</option>
-            <option>Electric</option>
-        </select>
-        <button type="button" className="w-full flex items-center justify-center text-primary border-2 border-primary py-3 rounded-full font-semibold ripple">
-            <Plus size={20} className="mr-2" /> Add Vehicle
-        </button>
-        <button type="submit" className="w-full mt-4 bg-primary text-white py-4 rounded-full text-lg font-semibold ripple">Next</button>
-    </form>
-);
+const Step2 = ({ next, formData, handleChange }: StepProps) => {
+    // Add a state to track if vehicle is added
+    const [vehicleAdded, setVehicleAdded] = useState(false);
+    
+    // Function to handle adding vehicle
+    const handleAddVehicle = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        // Check if all vehicle fields are filled
+        if (formData.vehicleBrand && formData.vehicleColor && formData.licenseNumber && formData.fuelType) {
+            setVehicleAdded(true);
+            // Show confirmation or proceed to next step
+            alert('Vehicle added successfully!');
+        } else {
+            alert('Please fill in all vehicle details before adding.');
+        }
+    };
+    
+    return (
+        <form onSubmit={(e) => { e.preventDefault(); next(); }} className="space-y-3">
+            <input name="vehicleBrand" type="text" placeholder="Vehicle Brand" value={formData.vehicleBrand} onChange={handleChange} className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm" required />
+            <input name="vehicleColor" type="text" placeholder="Vehicle Color" value={formData.vehicleColor} onChange={handleChange} className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm" required />
+            <input name="licenseNumber" type="text" placeholder="License Number" value={formData.licenseNumber} onChange={handleChange} className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm" required />
+            <select name="fuelType" value={formData.fuelType} onChange={handleChange} className="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-sm mobile-text-sm appearance-none">
+                <option>Petrol</option>
+                <option>Diesel</option>
+                <option>Electric</option>
+            </select>
+            <button 
+                type="button" 
+                onClick={handleAddVehicle}
+                className={`w-full flex items-center justify-center ${vehicleAdded ? 'bg-primary text-white' : 'text-primary border-2 border-primary'} py-2.5 rounded-full text-base font-semibold transition-all active:scale-95 hover:shadow-md mobile-btn-md ripple`}
+            >
+                <Plus size={20} className="mr-2" /> 
+                {vehicleAdded ? 'Vehicle Added' : 'Add Vehicle'}
+            </button>
+            <button type="submit" className="w-full mt-4 bg-primary text-white py-2.5 rounded-full text-base font-semibold shadow-lg transition-all active:scale-95 hover:shadow-xl flex items-center justify-center mobile-btn-md ripple">Next</button>
+        </form>
+    );
+};
 
 const DetailRow = ({ label, value }: { label: string; value: string }) => (
     <div className="flex justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-        <span className="text-gray-500 dark:text-gray-400">{label}</span>
-        <span className="font-medium text-right">{value}</span>
+        <span className="text-gray-500 dark:text-gray-400 text-sm mobile-text-sm">{label}</span>
+        <span className="font-medium text-right text-sm mobile-text-sm">{value}</span>
     </div>
 );
 
 
-const Step3 = ({ createAccount, editDetails, formData }: { createAccount: () => void, editDetails: () => void, formData: any }) => (
+const Step3 = ({ createAccount, editDetails, formData, isCreatingAccount }: { createAccount: () => void, editDetails: () => void, formData: any, isCreatingAccount: boolean }) => (
     <div className="flex flex-col h-full">
-        <div className="flex-grow bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md space-y-2">
+        <div className="flex-grow bg-light-card dark:bg-dark-card p-4 rounded-2xl shadow-md space-y-2">
             <DetailRow label="Name" value={formData.fullName} />
             <DetailRow label="Email Address" value={formData.email} />
             <DetailRow label="Phone No." value={formData.phone} />
@@ -280,9 +368,15 @@ const Step3 = ({ createAccount, editDetails, formData }: { createAccount: () => 
             <DetailRow label="License Number" value={formData.licenseNumber} />
             <DetailRow label="Fuel Type" value={formData.fuelType} />
         </div>
-        <div className="mt-8 space-y-4">
-            <button onClick={createAccount} className="w-full bg-primary text-white py-4 rounded-full text-lg font-semibold ripple">Create Account</button>
-            <button onClick={editDetails} className="w-full text-primary py-4 rounded-full text-lg font-semibold ripple">Edit Details</button>
+        <div className="mt-6 space-y-3">
+            <button 
+                onClick={createAccount} 
+                disabled={isCreatingAccount}
+                className="w-full bg-primary text-white py-2.5 rounded-full text-base font-semibold shadow-lg transition-all active:scale-95 hover:shadow-xl flex items-center justify-center disabled:bg-primary/70 mobile-btn-md ripple"
+            >
+                {isCreatingAccount ? 'Creating Account...' : 'Create Account'}
+            </button>
+            <button onClick={editDetails} className="w-full text-primary py-2.5 rounded-full text-base font-semibold transition-all active:scale-95 hover:shadow-md mobile-btn-md ripple">Edit Details</button>
         </div>
     </div>
 );

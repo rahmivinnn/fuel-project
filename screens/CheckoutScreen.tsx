@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, CreditCard, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Check, CreditCard, Save, Package, Fuel } from 'lucide-react';
+import { Station, GroceryItem } from '../types';
 import LottieAnimation from '../components/LottieAnimation';
 import successAnimation from '../assets/animations/success.json';
 import AnimatedPage from '../components/AnimatedPage';
+import { formatPrice } from '../currency';
 
 const Stepper = ({ currentStep }: { currentStep: number }) => {
     const steps = [{id: 1, name: "Order"}, {id: 2, name: "Order summary"}, {id: 3, name: "Payment"}];
@@ -33,6 +35,9 @@ const Stepper = ({ currentStep }: { currentStep: number }) => {
 
 const CheckoutScreen = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { cartItems, station } = location.state || { cartItems: [], station: null };
+    
     const [step, setStep] = useState(1);
     const [orderData, setOrderData] = useState({});
 
@@ -61,13 +66,13 @@ const CheckoutScreen = () => {
     const renderStep = () => {
         switch (step) {
             case 1:
-                return <Step1 next={handleNext} />;
+                return <Step1 next={handleNext} station={station} />;
             case 2:
-                return <Step2 next={handleNext} />;
+                return <Step2 next={handleNext} cartItems={cartItems} station={station} />;
             case 3:
                 return <Step3 pay={handlePayment} />;
             default:
-                return <Step1 next={handleNext} />;
+                return <Step1 next={handleNext} station={station} />;
         }
     };
 
@@ -99,8 +104,8 @@ const SuccessModal = () => {
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-light-bg dark:bg-dark-card rounded-2xl p-8 text-center w-full max-w-sm flex flex-col items-center">
                 <LottieAnimation animationData={successAnimation} width={150} height={150} loop={false} />
-                <h3 className="text-xl font-bold mb-2">Your payment has Been made Successfully</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">Tracking ID No: #12345</p>
+                <h3 className="text-xl font-bold mb-2">Payment Successful!</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-6">Tracking ID: #{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
         <button onClick={() => navigate('/track')} className="w-full bg-primary text-white py-3 rounded-full font-semibold mb-3 ripple">Track Order</button>
                 <button onClick={() => navigate('/home')} className="w-full text-primary font-semibold ripple">Back To Home</button>
             </div>
@@ -108,7 +113,7 @@ const SuccessModal = () => {
     )
 }
 
-const Step1 = ({ next }: { next: (data: any) => void }) => {
+const Step1 = ({ next, station }: { next: (data: any) => void, station: Station | null }) => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -117,20 +122,22 @@ const Step1 = ({ next }: { next: (data: any) => void }) => {
     }
     return (
     <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="address" type="text" placeholder="Address" className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" defaultValue="Loreum ipsum" required/>
-        <input name="phone" type="tel" placeholder="Phone Number" className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" defaultValue="923556688" required/>
+        <input name="address" type="text" placeholder="Delivery Address" className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" required/>
+        <input name="phone" type="tel" placeholder="Phone Number (+62)" className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" required/>
         <div className="grid grid-cols-2 gap-4">
-            <input name="vehicleColor" type="text" placeholder="Vehicle Color" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" defaultValue="Vehicle Color" required/>
-            <input name="vehicleBrand" type="text" placeholder="Vehicle Brand" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" defaultValue="Toyota" required/>
-            <input name="licensePlate" type="text" placeholder="Number Plate" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" defaultValue="Abc 123" required/>
+            <input name="vehicleColor" type="text" placeholder="Vehicle Color" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" required/>
+            <input name="vehicleBrand" type="text" placeholder="Vehicle Brand" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" required/>
+            <input name="licensePlate" type="text" placeholder="License Plate" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" required/>
             <select name="fuelType" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent appearance-none">
-                <option>Petrol</option>
-                <option>Diesel</option>
+                <option value="">Select Fuel Type</option>
+                <option value="regular">Regular</option>
+                <option value="premium">Premium</option>
+                <option value="diesel">Diesel</option>
             </select>
-            <input name="quantity" type="text" placeholder="Quantity" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" defaultValue="10 liters" required/>
+            <input name="quantity" type="number" placeholder="Gallons" min="1" max="50" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent" required/>
             <select name="deliveryTime" className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent appearance-none">
-                <option>Instant</option>
-                <option>Schedule</option>
+                <option value="instant">Instant Delivery</option>
+                <option value="schedule">Schedule Later</option>
             </select>
         </div>
         <button type="submit" className="w-full mt-8 bg-primary text-white py-4 rounded-full text-lg font-semibold ripple">Save & Continue</button>
@@ -145,28 +152,79 @@ const DetailRow = ({ label, value, valueClass }: { label: string; value: string;
     </div>
 );
 
-const Step2 = ({ next }: { next: () => void }) => (
-    <div className="flex flex-col h-full">
-        <div className="flex-grow bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md space-y-1">
-            <h3 className="text-lg font-bold text-center mb-4">Fuel order details</h3>
-            <DetailRow label="Station Name" value="TurboFuel Express" />
-            <DetailRow label="Fuel Type" value="Premium Gasoline" />
-            <DetailRow label="Quantity" value="10 liters" />
-            <DetailRow label="Chocolate Cookies" value="$20.00" />
-            <DetailRow label="Delivery Time" value="Today, 12:30 AM" />
-            <DetailRow label="Vehicle Brand" value="Honda" />
-            <DetailRow label="Vehicle color" value="Red" />
-            <DetailRow label="License Number" value="CAN-1234" />
-            <DetailRow label="Fuel Cost" value="$90.00" />
-            <DetailRow label="Delivery Fee" value="$10.00" />
-            <DetailRow label="Total Amount" value="$120.00" valueClass="text-primary text-lg" />
+const Step2 = ({ next, cartItems, station }: { next: () => void, cartItems: {item: GroceryItem, quantity: number}[], station: Station | null }) => {
+    const getSubtotal = () => {
+        return cartItems.reduce((total, cartItem) => total + (cartItem.item.price * cartItem.quantity), 0);
+    };
+    
+    const getDeliveryFee = () => {
+        return 5.00; // Fixed delivery fee
+    };
+    
+    const getTotal = () => {
+        return getSubtotal() + getDeliveryFee();
+    };
+
+    return (
+        <div className="flex flex-col h-full">
+            <div className="flex-grow bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md space-y-1">
+                <h3 className="text-lg font-bold text-center mb-4">Order Summary</h3>
+                
+                {station && (
+                    <div className="mb-4 p-3 bg-primary/10 rounded-lg">
+                        <div className="flex items-center">
+                            <Fuel className="text-primary mr-2" size={20} />
+                            <div>
+                                <p className="font-semibold">{station.name}</p>
+                                <p className="text-sm text-gray-500">{station.address}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {cartItems && cartItems.length > 0 ? (
+                    <>
+                        <div className="mb-4">
+                            <h4 className="font-bold mb-2 flex items-center">
+                                <Package className="mr-2" size={16} />
+                                Groceries ({cartItems.length} items)
+                            </h4>
+                            {cartItems.map((cartItem, index) => (
+                                <div key={index} className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                                    <div>
+                                        <p className="font-medium">{cartItem.item.name}</p>
+                                        <p className="text-sm text-gray-500">Qty: {cartItem.quantity}</p>
+                                    </div>
+                                    <p className="font-medium">{formatPrice(cartItem.item.price * cartItem.quantity)}</p>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        <DetailRow label="Subtotal" value={formatPrice(getSubtotal())} />
+                        <DetailRow label="Delivery Fee" value={formatPrice(getDeliveryFee())} />
+                        <DetailRow label="Total Amount" value={formatPrice(getTotal())} valueClass="text-primary text-lg" />
+                    </>
+                ) : (
+                    <div className="text-center py-8 text-gray-500">
+                        <Package size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>No groceries added to your order</p>
+                    </div>
+                )}
+                
+                <div className="mt-6">
+                    <h4 className="font-bold mb-2">Fuel Details</h4>
+                    <DetailRow label="Fuel Type" value="Premium Gasoline" />
+                    <DetailRow label="Quantity" value="10 gallons" />
+                    <DetailRow label="Fuel Cost" value={formatPrice(38.50)} />
+                </div>
+            </div>
+            <div className="mt-8 space-y-4">
+                <button onClick={next} className="w-full bg-primary text-white py-4 rounded-full text-lg font-semibold ripple">Confirm Payment & Address</button>
+                <button className="w-full text-primary py-2 rounded-full text-sm font-semibold ripple">Edit Details</button>
+            </div>
         </div>
-        <div className="mt-8 space-y-4">
-        <button onClick={next} className="w-full bg-primary text-white py-4 rounded-full text-lg font-semibold ripple">Confirm Payment & Address</button>
-            <button className="w-full text-primary py-2 rounded-full text-sm font-semibold ripple">Edit Details</button>
-        </div>
-    </div>
-);
+    );
+};
 
 const Step3 = ({ pay }: { pay: () => void }) => {
     const [paymentMethod, setPaymentMethod] = useState('card');
@@ -190,15 +248,15 @@ const Step3 = ({ pay }: { pay: () => void }) => {
                     <p className="text-sm">BANK NAME</p>
                     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" className="h-8 absolute top-4 right-4" />
                 </div>
-                <p className="text-2xl tracking-widest">1844 444 7860</p>
+                <p className="text-2xl tracking-widest">**** **** **** 7860</p>
                 <div className="flex justify-between items-end">
                     <div>
                         <p className="text-xs">Holder Name</p>
-                        <p>Loreum Ipsum</p>
+                        <p>Your Name</p>
                     </div>
                     <div>
                         <p className="text-xs">Exp. Date</p>
-                        <p>10/28</p>
+                        <p>MM/YY</p>
                     </div>
                 </div>
             </div>

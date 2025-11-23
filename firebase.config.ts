@@ -10,3 +10,8 @@ export const firebaseConfig = {
 
 // Google Client ID for authentication
 export const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+// Log a warning if the Google Client ID is not properly configured
+if (!googleClientId || googleClientId.includes('your-google-client-id') || googleClientId.includes('abcdefghijklmnopqrstuvwxyz')) {
+  console.warn('Google Client ID is not properly configured. Google login may not work.');
+}

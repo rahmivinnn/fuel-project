@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronRight, Lock, CreditCard, Calculator, Sun, Moon, Bell, HelpCircle, FileText, Shield, Trash2, LogOut, User } from 'lucide-react';
+import { ArrowLeft, ChevronRight, LogOut, User } from 'lucide-react';
 import { useAppContext } from '../App';
 import { messaging, getToken } from '../firebase';
 import { apiRegisterPushToken, apiSendTestPush } from '../services/api';
 import AnimatedPage from '../components/AnimatedPage';
 
-const SettingsItem = ({ icon, text, onClick }: { icon: React.ReactNode, text: string, onClick?: () => void }) => (
-    <div onClick={onClick} className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-card rounded-lg transition-colors ripple">
-        <div className="flex items-center">
-            <div className="p-2 bg-primary/10 rounded-full text-primary mr-4">{icon}</div>
-            <span className="font-semibold">{text}</span>
-        </div>
+const SettingsItem = ({ text, onClick }: { text: string, onClick?: () => void }) => (
+    <div 
+        onClick={onClick} 
+        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-card rounded-full transition-colors ripple"
+    >
+        <span className="font-semibold">{text}</span>
         <ChevronRight className="text-gray-400" />
     </div>
 );
@@ -65,7 +65,7 @@ const SettingsScreen = () => {
                  <div className="flex items-center p-4 bg-light-card dark:bg-dark-card rounded-2xl cursor-pointer" onClick={() => navigate('/profile')}>
                     <img src={user?.avatarUrl} alt="User" className="w-16 h-16 rounded-full" />
                     <div className="ml-4 flex-grow">
-                        <p className="font-bold text-lg">{user?.fullName}</p>
+                        <p className="font-bold text-lg">{user?.fullName || 'User'}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">View Profile</p>
                     </div>
                     <ChevronRight className="text-gray-400" />
@@ -74,35 +74,69 @@ const SettingsScreen = () => {
 
                 <div>
                     <h3 className="text-gray-500 dark:text-gray-400 text-sm font-semibold mb-2 px-4">Account</h3>
-                    <div className="bg-light-bg dark:bg-dark-card rounded-xl">
-                        <SettingsItem icon={<Lock size={20} />} text="Manage Passwords" />
-                        <SettingsItem icon={<CreditCard size={20} />} text="Manage Payment Method" />
+                    <div className="bg-light-bg dark:bg-dark-card rounded-2xl">
+                        <SettingsItem 
+                            text="Manage Passwords" 
+                            onClick={() => navigate('/manage-password')} 
+                        />
+                        <SettingsItem 
+                            text="Manage Payment Method" 
+                            onClick={() => navigate('/manage-payment')} 
+                        />
                     </div>
                 </div>
 
                 <div>
                     <h3 className="text-gray-500 dark:text-gray-400 text-sm font-semibold mb-2 px-4">App Settings</h3>
-                    <div className="bg-light-bg dark:bg-dark-card rounded-xl">
-                        <SettingsItem icon={<Calculator size={20} />} text="Fuel Efficiency Calculator" />
-                        <SettingsItem icon={<Sun size={20} />} text="Themes" />
-                        <SettingsItem icon={<Bell size={20} />} text="Enable Notifications" onClick={enableNotifications} />
+                    <div className="bg-light-bg dark:bg-dark-card rounded-2xl">
+                        <SettingsItem 
+                            text="Fuel Efficiency Calculator" 
+                            onClick={() => navigate('/fuel-calculator')} 
+                        />
+                        <SettingsItem 
+                            text="Fuel Price Comparison" 
+                            onClick={() => navigate('/fuel-price-comparison')} 
+                        />
+                        <SettingsItem 
+                            text="Themes" 
+                            onClick={() => navigate('/themes')} 
+                        />
+                        <SettingsItem 
+                            text="Enable Notifications" 
+                            onClick={enableNotifications} 
+                        />
                         <div className="px-4 pb-2 text-xs text-gray-500 dark:text-gray-400">{notifStatus}</div>
-                        <SettingsItem icon={<Bell size={20} />} text="Test Push" onClick={testPush} />
+                        <SettingsItem 
+                            text="Test Push" 
+                            onClick={testPush} 
+                        />
                     </div>
                 </div>
 
                 <div>
                     <h3 className="text-gray-500 dark:text-gray-400 text-sm font-semibold mb-2 px-4">Customer Care</h3>
-                    <div className="bg-light-bg dark:bg-dark-card rounded-xl">
-                        <SettingsItem icon={<HelpCircle size={20} />} text="Help and Support" />
-                        <SettingsItem icon={<FileText size={20} />} text="Terms and Conditions" />
-                        <SettingsItem icon={<Shield size={20} />} text="Privacy Policy" />
+                    <div className="bg-light-bg dark:bg-dark-card rounded-2xl">
+                        <SettingsItem 
+                            text="Help and Support" 
+                            onClick={() => navigate('/help')} 
+                        />
+                        <SettingsItem 
+                            text="Terms and Conditions" 
+                            onClick={() => navigate('/terms')} 
+                        />
+                        <SettingsItem 
+                            text="Privacy Policy" 
+                            onClick={() => navigate('/privacy')} 
+                        />
                     </div>
                 </div>
 
                 <div>
-                     <div className="bg-light-bg dark:bg-dark-card rounded-xl">
-                        <SettingsItem icon={<Trash2 size={20} />} text="Request Account Deletion" />
+                     <div className="bg-light-bg dark:bg-dark-card rounded-2xl">
+                        <SettingsItem 
+                            text="Request Account Deletion" 
+                            onClick={() => navigate('/account-deletion')} 
+                        />
                     </div>
                 </div>
 
